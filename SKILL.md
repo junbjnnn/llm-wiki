@@ -18,13 +18,14 @@ metadata:
 Automated first-time setup. Run this before any other /wiki command.
 1. Check Python 3.11+ installed. If not → tell user how to install
 2. Install dependencies: `pip install markitdown[all] pyyaml`
-3. Run: `python scripts/init-wiki.py --name "<name>" --target .`
-4. Verify: `.wiki/` created with AGENTS.md, sources/, wiki/
-5. Print quick guide:
+3. If `--name` not provided, auto-detect from: folder name, package.json name, or git remote
+4. Run: `python scripts/init-wiki.py --name "<name>" --language "<language>" --target .`
+5. Verify: `.wiki/` created with AGENTS.md, sources/, wiki/
+6. Print quick guide:
    - "Ingest: `/wiki ingest <file> --category <cat>`"
    - "Compile: `/wiki compile`"
    - "Query: `/wiki query <question>`"
-6. Ask user: "Do you have a document to ingest now?"
+7. Ask user: "Do you have a document to ingest now?"
 
 ### `/wiki init [--name "Name"] [--language en] [--with-qmd] [--no-obsidian]`
 Initialize wiki in current project.

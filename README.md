@@ -71,11 +71,15 @@ project-repo/
 npx skills add junbjnnn/llm-wiki
 ```
 
-Then tell your AI agent:
+Then in your AI tool:
 
-> "Setup llm-wiki for this project and show me how to use it"
+```
+/wiki setup
+```
 
-That's it. The agent handles dependencies, initialization, and walks you through your first ingest + compile.
+Options: `/wiki setup --name "My Project" --language vi`
+
+The agent handles dependencies, initialization, and walks you through your first ingest + compile.
 
 **Manual setup:** See [Getting Started](docs/getting-started.md)
 
