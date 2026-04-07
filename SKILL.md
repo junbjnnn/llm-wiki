@@ -14,6 +14,18 @@ metadata:
 
 ## Commands
 
+### `/wiki setup [--name "Name"] [--language en]`
+Automated first-time setup. Run this before any other /wiki command.
+1. Check Python 3.11+ installed. If not → tell user how to install
+2. Install dependencies: `pip install markitdown[all] pyyaml`
+3. Run: `python scripts/init-wiki.py --name "<name>" --target .`
+4. Verify: `.wiki/` created with AGENTS.md, sources/, wiki/
+5. Print quick guide:
+   - "Ingest: `/wiki ingest <file> --category <cat>`"
+   - "Compile: `/wiki compile`"
+   - "Query: `/wiki query <question>`"
+6. Ask user: "Do you have a document to ingest now?"
+
 ### `/wiki init [--name "Name"] [--language en] [--with-qmd] [--no-obsidian]`
 Initialize wiki in current project.
 1. Run: `python scripts/init-wiki.py --name "Project Name" --language en --target .`

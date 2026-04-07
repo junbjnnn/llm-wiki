@@ -1,43 +1,48 @@
 # Getting Started
 
-## Prerequisites
+## Agent Setup (Recommended)
+
+```bash
+npx skills add junbjnnn/llm-wiki
+```
+
+Then tell your AI agent:
+
+> "Setup llm-wiki for this project and show me how to use it"
+
+The agent handles Python dependencies, initialization, and guides you through your first ingest.
+
+## Manual Setup
+
+### Prerequisites
 
 - Python 3.11+
 - git
 - An AI tool (Claude Code, Cursor, Copilot, Gemini CLI, etc.)
 
-## Setup
-
-### 1. Get llm-wiki
+### 1. Install dependencies
 
 ```bash
-git clone https://github.com/your-org/llm-wiki.git
-cd llm-wiki
+pip install markitdown[all] pyyaml
 ```
 
-### 2. Create Python environment
+### 2. Initialize wiki in your project
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate    # macOS/Linux
-# .venv\Scripts\activate     # Windows
-pip install -r requirements.txt
-```
+# Clone llm-wiki repo (for scripts)
+git clone https://github.com/junbjnnn/llm-wiki.git /tmp/llm-wiki
 
-### 3. Initialize wiki in your project
-
-```bash
-# Default: creates .wiki/ subfolder in your project
-python scripts/init-wiki.py --target /path/to/project --name "My Project Wiki"
+# Initialize in your project
+python /tmp/llm-wiki/scripts/init-wiki.py --target /path/to/project --name "My Project Wiki"
 
 # Options:
 #   --language vi       Wiki page language (default: en)
 #   --root .            Standalone repo mode (no .wiki/ subfolder)
 #   --with-qmd          Setup qmd search if installed
-#   --obsidian          Generate .obsidian/ vault config for Obsidian app
+#   --no-obsidian       Skip .obsidian/ vault config
 ```
 
-### 4. Verify setup
+### 3. Verify setup
 
 ```bash
 cd /path/to/project

@@ -68,23 +68,16 @@ project-repo/
 ## Quick Start
 
 ```bash
-# 1. Clone
-git clone https://github.com/your-org/llm-wiki.git
-cd llm-wiki
-
-# 2. Install dependencies
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-
-# 3. Initialize wiki in your project
-python scripts/init-wiki.py --target /path/to/your-project --name "My Project"
-
-# 4. Ingest your first document
-python .wiki/scripts/ingest.py meeting-notes.pdf --category meetings --output .wiki/sources/meetings/
-
-# 5. Ask your AI tool to compile and query
-# (Open your AI tool, it reads .wiki/AGENTS.md automatically)
+npx skills add junbjnnn/llm-wiki
 ```
+
+Then tell your AI agent:
+
+> "Setup llm-wiki for this project and show me how to use it"
+
+That's it. The agent handles dependencies, initialization, and walks you through your first ingest + compile.
+
+**Manual setup:** See [Getting Started](docs/getting-started.md)
 
 ## Scripts
 
