@@ -1,3 +1,13 @@
+---
+name: llm-wiki
+description: "Build and maintain a git-based markdown wiki for software teams. Use when user mentions wiki, knowledge base, llm-wiki, ingest documents, compile sources, or query project knowledge."
+license: MIT
+compatibility: Requires Python 3.11+ and git
+metadata:
+  author: junbjnnn
+  version: "1.0"
+---
+
 # llm-wiki — Knowledge Base Manager
 
 > Activate with `/wiki` prefix. Git-based markdown wiki for software teams.

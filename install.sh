@@ -1,21 +1,20 @@
 #!/usr/bin/env bash
 # Install llm-wiki skill for Claude Code.
-# Usage: bash skill/install.sh
+# Usage: bash install.sh
 
 set -euo pipefail
 
 SKILL_DIR="$HOME/.claude/skills/llm-wiki"
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_DIR="$(dirname "$SCRIPT_DIR")"
+REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "Installing llm-wiki skill..."
 
 mkdir -p "$SKILL_DIR"
-cp "$SCRIPT_DIR/SKILL.md" "$SKILL_DIR/SKILL.md"
+cp "$REPO_DIR/SKILL.md" "$SKILL_DIR/SKILL.md"
 
-# Copy templates
-mkdir -p "$SKILL_DIR/templates"
-cp "$SCRIPT_DIR/templates/"* "$SKILL_DIR/templates/"
+# Copy references (templates)
+mkdir -p "$SKILL_DIR/references"
+cp "$REPO_DIR/references/"* "$SKILL_DIR/references/"
 
 # Copy scripts
 mkdir -p "$SKILL_DIR/scripts"
@@ -23,3 +22,6 @@ cp "$REPO_DIR/scripts/"*.py "$SKILL_DIR/scripts/"
 
 echo "Skill installed at $SKILL_DIR"
 echo "Activate with /wiki in Claude Code."
+echo ""
+echo "Or install via agentskills.io (works with all agents):"
+echo "  npx skills add junbjnnn/llm-wiki"

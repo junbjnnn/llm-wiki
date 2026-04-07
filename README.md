@@ -2,6 +2,14 @@
 
 Git-based markdown wiki for software teams. No server, no database. Pure git + markdown + Python scripts. Bring your own AI tool.
 
+## Install
+
+```bash
+npx skills add junbjnnn/llm-wiki
+```
+
+Works with Claude Code, Cursor, Codex, Gemini CLI, and [20+ other agents](https://agentskills.io).
+
 ## Why
 
 - **Tool-agnostic:** Works with Claude, Cursor, Copilot, Gemini, Codex — any tool that reads markdown
@@ -75,7 +83,8 @@ python .wiki/scripts/ingest.py meeting-notes.pdf --category meetings --output .w
 ## Claude Code Integration
 
 ```bash
-bash skill/install.sh    # Install /wiki skill
+bash install.sh    # Manual install for Claude Code
+# Or: npx skills add junbjnnn/llm-wiki  (works with all agents)
 # Then use: /wiki init, /wiki ingest, /wiki compile, /wiki query, etc.
 ```
 

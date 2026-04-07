@@ -16,7 +16,7 @@ from pathlib import Path
 # Resolve paths relative to this script's location (the repo)
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_DIR = SCRIPT_DIR.parent
-TEMPLATES_DIR = REPO_DIR / "skill" / "templates"
+TEMPLATES_DIR = REPO_DIR / "references"
 
 # Import constants from config to avoid duplication
 sys.path.insert(0, str(SCRIPT_DIR))
