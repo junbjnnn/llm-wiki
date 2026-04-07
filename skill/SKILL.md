@@ -30,9 +30,15 @@ AI reads uncompiled sources → creates wiki pages.
    - **Short (≤1000 chars):** Create summary only, concepts as [pending]
    - **Check duplicates:** Search existing summaries by `sources` frontmatter field → update don't duplicate
 3. Save pages to `.wiki/wiki/<type>/` with full frontmatter
-4. Run: `python scripts/update-index.py`
-5. Append to `.wiki/log.md`: `| <date> | compile | compiled N sources | claude |`
-6. Commit: `git commit -am "docs: compile N new sources"`
+4. **Conflict detection:** If new source contradicts existing content:
+   - Add `> ⚠️ Conflict: [[source-a]] states X, but [[source-b]] states Y.` blockquote
+   - Keep both viewpoints, never silently overwrite
+5. **Cascade updates:** Scan existing wiki pages for content affected by new source:
+   - Update affected pages (add new info, cross-refs)
+   - Refresh `updated` date on every touched page
+6. Run: `python scripts/update-index.py`
+7. Append to `.wiki/log.md`: `| <date> | compile | compiled N sources, cascade-updated M | claude |`
+8. Commit: `git commit -am "docs: compile N sources, cascade-updated M pages"`
 
 ### `/wiki ingest+compile <file> [--category <cat>]`
 Shortcut: ingest then compile in one step.
@@ -58,9 +64,13 @@ Deep cross-source synthesis on a topic.
 
 ### `/wiki lint`
 Check wiki health.
-1. Run: `python scripts/lint.py`
-2. Review output for issues (orphans, broken links, stale pages)
-3. Fix issues found. Re-run lint until clean.
+1. Run: `python scripts/lint.py` — deterministic checks (orphans, broken links, stale, frontmatter)
+2. **AI heuristic checks** (report only):
+   - Factual contradictions missing `⚠️ Conflict` annotations
+   - Outdated claims superseded by newer sources
+   - Frequently mentioned concepts lacking dedicated pages
+   - Missing cross-references between related pages
+3. Fix deterministic issues. Report heuristic findings to user.
 
 ### `/wiki status`
 Wiki statistics.

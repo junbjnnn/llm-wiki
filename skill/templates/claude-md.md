@@ -18,3 +18,5 @@ This project uses an llm-wiki knowledge base. Read `AGENTS.md` for full conventi
 3. Log mutations to `log.md` — never log read-only queries
 4. Check for existing pages before creating (avoid duplicates via `sources` frontmatter field)
 5. Run `python scripts/update-index.py` after any wiki changes
+6. **Conflict detection:** Never silently overwrite contradicting content. Add `> ⚠️ Conflict` blockquote with source attribution
+7. **Cascade updates:** After compiling new sources, scan existing wiki pages for affected content and update them

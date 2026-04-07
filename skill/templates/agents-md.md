@@ -31,9 +31,18 @@ Git-based markdown wiki. Sources in `sources/`, generated pages in `wiki/`. Conf
    - **Long content (>1000 chars):** Create `wiki/summaries/<name>.md` + extract entities → `wiki/entities/` + extract concepts → `wiki/concepts/` + add `[[wikilinks]]`
    - **Short content (≤1000 chars):** Create summary only, mark concepts as `[pending]`
 3. **Update detection:** Check `wiki/summaries/` for existing page with same source in frontmatter `sources` field → UPDATE don't duplicate
-4. Run: `python scripts/update-index.py`
-5. Append to `log.md`: `| <date> | compile | <details> | <author> |`
-6. Git commit: `docs: compile N new sources`
+4. **Conflict detection:** If new source contradicts existing wiki content:
+   - Do NOT silently overwrite. Add a `> ⚠️ Conflict` blockquote in the affected section
+   - Format: `> ⚠️ Conflict: [[source-a]] states X, but [[source-b]] states Y.`
+   - Keep both viewpoints with source attribution
+5. **Cascade updates:** After primary pages are created/updated:
+   - Scan wiki pages in related topics for content affected by the new source
+   - Update every page whose content is materially affected (add new info, cross-refs)
+   - Refresh `updated` date on every touched page
+   - Log each cascaded page in the commit message
+6. Run: `python scripts/update-index.py`
+7. Append to `log.md`: `| <date> | compile | <details> | <author> |`
+8. Git commit: `docs: compile N sources, cascade-updated M pages`
 
 ### Query (AI-powered — mandatory feedback loop)
 1. Search wiki: read `index.md`, grep for keywords, or `qmd query` if available
@@ -49,9 +58,13 @@ Git-based markdown wiki. Sources in `sources/`, generated pages in `wiki/`. Conf
 4. Always creates a page. Always logs to `log.md`.
 
 ### Lint
-1. Run: `python scripts/lint.py`
-2. Review output: orphans, broken links, stale pages, missing frontmatter
-3. Fix issues. Run lint again until clean.
+1. Run: `python scripts/lint.py` — deterministic checks (orphans, broken links, stale, frontmatter)
+2. **AI heuristic checks** (report only, do not auto-fix):
+   - Factual contradictions across pages (missing `⚠️ Conflict` annotations)
+   - Outdated claims superseded by newer sources
+   - Concepts mentioned frequently but lacking a dedicated page
+   - Missing cross-references between related pages
+3. Fix deterministic issues. Report heuristic findings to user.
 
 ### Graph
 1. Run: `python scripts/graph.py`
