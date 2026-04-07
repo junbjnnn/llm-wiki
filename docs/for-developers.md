@@ -25,11 +25,11 @@ All scripts use argparse. Run `python <script> --help` for full options.
 
 | Script | Usage | Exit Code |
 |--------|-------|-----------|
-| `init-wiki.py` | `--name "Name" --language en --target .` | 0 |
+| `init-wiki.py` | `--name "Name" [--obsidian] [--language en] [--target .]` | 0 |
 | `ingest.py` | `<file> --category cat [--output dir/]` | 0/1 |
 | `update-index.py` | `[--dry-run]` | 0 |
 | `lint.py` | `[--fix] [--strict]` | 0=clean, 1=issues |
-| `stats.py` | `[--json]` | 0 |
+| `stats.py` | `[--json] [--benchmark]` | 0 |
 | `graph.py` | `[--output path] [--dry-run]` | 0 |
 
 ## Configuration
@@ -79,6 +79,7 @@ type: summary          # One of page_types
 tags: [tag1, tag2]
 created: 2026-04-07
 updated: 2026-04-07
+citations: []          # Source references (optional but recommended)
 ---
 ```
 
@@ -94,9 +95,9 @@ This relates to [[api-gateway-overview]] and [[auth-flow]].
 
 `scripts/lint.py` checks for broken links.
 
-## qmd Search (Optional)
+## qmd Search (Strongly Recommended)
 
-For wikis with 100+ pages:
+For wikis with 50+ pages (essential for 100+):
 ```bash
 npm install -g @tobilu/qmd
 bash scripts/setup-qmd.sh

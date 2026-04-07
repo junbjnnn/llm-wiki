@@ -34,6 +34,7 @@ python scripts/init-wiki.py --target /path/to/project --name "My Project Wiki"
 #   --language vi       Wiki page language (default: en)
 #   --root .            Standalone repo mode (no .wiki/ subfolder)
 #   --with-qmd          Setup qmd search if installed
+#   --obsidian          Generate .obsidian/ vault config for Obsidian app
 ```
 
 ### 4. Verify setup
@@ -62,12 +63,14 @@ Open your AI tool in the project directory. It reads `.wiki/AGENTS.md` automatic
 
 Ask: *"Compile the wiki — process any uncompiled sources in .wiki/sources/"*
 
-The AI will:
-1. Read sources → create wiki pages (summaries, entities, concepts)
-2. Add [[wikilinks]] cross-references
-3. Update index.md
-4. Append to log.md
-5. Commit changes
+The AI runs a 3-stage compile pipeline:
+1. **Diff** — Scan sources/ vs wiki/summaries/ to identify new/changed documents
+2. **Extract** — For each new source: extract entities, concepts, relationships, and citations
+3. **Generate** — Create/update wiki pages with wikilinks, detect conflicts, cascade-update related pages
+
+After compilation:
+- Run `python .wiki/scripts/update-index.py` to rebuild the catalog
+- Changes are appended to log.md and committed
 
 ## First Query
 

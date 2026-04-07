@@ -7,6 +7,7 @@ Usage:
 """
 
 import argparse
+import json
 import shutil
 import subprocess
 import sys
@@ -123,6 +124,39 @@ def copy_scripts(wiki_root: Path) -> None:
         shutil.copy2(py_file, dest / py_file.name)
 
 
+def setup_obsidian(wiki_root: Path) -> None:
+    """Create .obsidian/ config for Obsidian vault compatibility."""
+    obsidian_dir = wiki_root / ".obsidian"
+    obsidian_dir.mkdir(exist_ok=True)
+
+    app_config = {
+        "strictLineBreaks": True,
+        "showLineNumber": True,
+        "useMarkdownLinks": False,
+        "newLinkFormat": "shortest",
+        "attachmentFolderPath": "sources",
+    }
+    (obsidian_dir / "app.json").write_text(json.dumps(app_config, indent=2))
+
+    graph_config = {
+        "colorGroups": [
+            {"query": "path:wiki/summaries", "color": {"a": 1, "rgb": 3447003}},
+            {"query": "path:wiki/entities", "color": {"a": 1, "rgb": 15105570}},
+            {"query": "path:wiki/concepts", "color": {"a": 1, "rgb": 3066993}},
+            {"query": "path:wiki/comparisons", "color": {"a": 1, "rgb": 16776960}},
+            {"query": "path:wiki/syntheses", "color": {"a": 1, "rgb": 10181046}},
+            {"query": "path:wiki/chronicles", "color": {"a": 1, "rgb": 9936031}},
+            {"query": "path:wiki/decisions", "color": {"a": 1, "rgb": 15158332}},
+            {"query": "path:wiki/runbooks", "color": {"a": 1, "rgb": 1752220}},
+            {"query": "path:wiki/postmortems", "color": {"a": 1, "rgb": 15548997}},
+            {"query": "path:sources", "color": {"a": 1, "rgb": 9807270}},
+        ]
+    }
+    (obsidian_dir / "graph.json").write_text(json.dumps(graph_config, indent=2))
+
+    (obsidian_dir / "community-plugins.json").write_text("[]")
+
+
 def setup_qmd(wiki_root: Path) -> None:
     """Setup qmd if available."""
     if shutil.which("qmd") is None:
@@ -140,6 +174,7 @@ def main() -> None:
     parser.add_argument("--root", default=".wiki", help="Wiki root dir (.wiki or .)")
     parser.add_argument("--target", default=".", help="Target project directory")
     parser.add_argument("--with-qmd", action="store_true", help="Setup qmd search")
+    parser.add_argument("--obsidian", action="store_true", help="Generate .obsidian/ config")
     args = parser.parse_args()
 
     target = Path(args.target).resolve()
@@ -168,11 +203,22 @@ def main() -> None:
     if args.with_qmd:
         setup_qmd(wiki_root)
 
+    if args.obsidian:
+        setup_obsidian(wiki_root)
+        print(f"  Obsidian: {wiki_root / '.obsidian'} (vault config created)")
+        print("  Note: Consider adding .obsidian/ to .gitignore (personal preferences)")
+
     print(f"Wiki initialized at {wiki_root}")
     print(f"  Sources: {wiki_root / 'sources'} ({len(SOURCE_CATEGORIES)} categories)")
     print(f"  Wiki:    {wiki_root / 'wiki'} ({len(WIKI_SUBDIRS)} page types)")
     print(f"  Config:  {wiki_root / '.llm-wiki.toml'}")
     print(f"  Schema:  {wiki_root / 'AGENTS.md'}")
+
+    if not args.with_qmd and shutil.which("qmd") is None:
+        print()
+        print("  Tip: qmd not installed. Strongly recommended for wikis with 50+ pages.")
+        print("  Install: npm install -g @tobilu/qmd")
+        print("  Setup:   python scripts/init-wiki.py --with-qmd")
 
 
 if __name__ == "__main__":

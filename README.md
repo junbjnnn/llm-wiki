@@ -16,6 +16,7 @@ Works with Claude Code, Cursor, Codex, Gemini CLI, and [20+ other agents](https:
 
 - **Tool-agnostic:** Works with Claude, Cursor, Copilot, Gemini, Codex — any tool that reads markdown
 - **AGENTS.md standard:** Universal schema readable by any AI tool
+- **Obsidian compatible:** Wikilinks work natively. Optional `--obsidian` flag generates vault config with graph colors by page type
 - **Compounding knowledge:** Every query can feed insights back into the wiki
 - **Zero infrastructure:** git repo = your wiki. No hosting, no server, no API keys
 
@@ -166,7 +167,7 @@ bash install.sh    # Manual install for Claude Code
 
 - Python 3.11+
 - git
-- Optional: [qmd](https://github.com/tobi/qmd) for semantic search (recommended for 100+ pages)
+- Strongly recommended: [qmd](https://github.com/tobi/qmd) for hybrid search (recommended for 50+ pages, essential for 100+)
 
 ## Docs
 

@@ -48,12 +48,15 @@ Wiki pages have a header (frontmatter) that looks like:
 title: Auth System Overview
 type: summary
 tags: [auth, security]
-confidence: medium
+citations: ["design-doc-2026-03.md", "security-audit.pdf"]
+created: 2026-04-01
+updated: 2026-04-07
 ```
 
 - **type** tells you what kind of page it is (summary, decision, runbook, etc.)
-- **confidence** tells you how reliable: high, medium, or low
+- **citations** references the original documents the page was created from
 - **tags** help with searching
+- **created/updated** track when the page was created and last modified
 
 ## Common Workflows
 

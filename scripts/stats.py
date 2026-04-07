@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Wiki statistics: page counts, cross-ref density, recent activity.
+"""Wiki statistics: page counts, cross-ref density, quality metrics.
 
 Usage:
-    python scripts/stats.py [--json]
+    python scripts/stats.py [--json] [--benchmark]
 """
 
 import argparse
 import json
+import shutil
 import sys
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 
 from config import extract_wikilinks, find_wiki_root, get_paths, load_config, parse_frontmatter
@@ -27,12 +28,17 @@ def count_sources(sources_dir: Path) -> dict[str, int]:
     return counts
 
 
-def analyze_wiki(wiki_dir: Path) -> dict:
-    """Analyze wiki pages for statistics."""
+def analyze_wiki(wiki_dir: Path, sources_dir: Path = None, benchmark: bool = False) -> dict:
+    """Analyze wiki pages for statistics and optional quality metrics."""
+    from datetime import date, timedelta
+
     pages_by_type: dict[str, int] = Counter()
     total_links = 0
     page_count = 0
     inbound: dict[str, int] = Counter()
+    fresh_count = 0
+    cited_count = 0
+    threshold = date.today() - timedelta(days=30) if benchmark else None
 
     for md_file in wiki_dir.rglob("*.md"):
         if md_file.name.startswith("_"):
@@ -41,6 +47,15 @@ def analyze_wiki(wiki_dir: Path) -> dict:
         fm = parse_frontmatter(text)
         if fm:
             pages_by_type[fm.get("type", "unknown")] += 1
+            if benchmark:
+                try:
+                    updated = date.fromisoformat(str(fm.get("updated", "")))
+                    if updated >= threshold:
+                        fresh_count += 1
+                except (ValueError, TypeError):
+                    pass
+                if fm.get("citations"):
+                    cited_count += 1
 
         links = extract_wikilinks(text)
         total_links += len(links)
@@ -48,14 +63,11 @@ def analyze_wiki(wiki_dir: Path) -> dict:
         for link in links:
             inbound[link] += 1
 
-    # Top connected pages
     top_connected = inbound.most_common(5)
-
-    # Orphans (0 inbound)
     all_names = {f.stem for f in wiki_dir.rglob("*.md") if not f.name.startswith("_")}
     orphan_count = len(all_names - set(inbound.keys()))
 
-    return {
+    result = {
         "total_pages": page_count,
         "pages_by_type": dict(pages_by_type),
         "total_wikilinks": total_links,
@@ -63,6 +75,23 @@ def analyze_wiki(wiki_dir: Path) -> dict:
         "orphan_count": orphan_count,
         "top_connected": [{"page": p, "inbound": c} for p, c in top_connected],
     }
+
+    if benchmark and page_count > 0:
+        source_count = sum(1 for f in sources_dir.rglob("*.md") if f.is_file()) if sources_dir and sources_dir.exists() else 0
+        summary_count = pages_by_type.get("summary", 0)
+        coverage = min(round((summary_count / source_count * 100) if source_count > 0 else 100), 100)
+        avg_inbound = sum(inbound.values()) / page_count
+        connectivity = min(round(avg_inbound * 20), 100)
+        freshness = round(fresh_count / page_count * 100)
+        citation_rate = round(cited_count / page_count * 100)
+        health_score = round(coverage * 0.30 + connectivity * 0.25 + freshness * 0.25 + citation_rate * 0.20)
+        result["quality"] = {
+            "coverage": coverage, "connectivity": connectivity,
+            "freshness": freshness, "citation_rate": citation_rate,
+            "health_score": health_score,
+        }
+
+    return result
 
 
 def recent_log(log_path: Path, count: int = 10) -> list[str]:
@@ -78,6 +107,7 @@ def recent_log(log_path: Path, count: int = 10) -> list[str]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Wiki statistics")
     parser.add_argument("--json", action="store_true", help="JSON output")
+    parser.add_argument("--benchmark", action="store_true", help="Show quality metrics")
     args = parser.parse_args()
 
     try:
@@ -90,12 +120,14 @@ def main() -> None:
 
     wiki_name = config.get("wiki", {}).get("name", "Wiki")
     source_counts = count_sources(paths["sources"])
-    wiki_stats = analyze_wiki(paths["wiki"])
+    wiki_stats = analyze_wiki(paths["wiki"], paths["sources"], args.benchmark)
     log_entries = recent_log(paths["log"])
 
+    qmd_available = shutil.which("qmd") is not None
     stats = {
         "wiki_name": wiki_name,
         "sources": {"total": sum(source_counts.values()), "by_category": source_counts},
+        "search_backend": "qmd" if qmd_available else "grep",
         **wiki_stats,
         "recent_log": log_entries,
     }
@@ -113,10 +145,20 @@ def main() -> None:
         print(f"\nCross-refs: {wiki_stats['total_wikilinks']} total, "
               f"{wiki_stats['avg_links_per_page']} avg/page")
         print(f"Orphans: {wiki_stats['orphan_count']}")
+        search_status = "qmd (hybrid search)" if qmd_available else "grep only (consider installing qmd)"
+        print(f"Search: {search_status}")
         if wiki_stats["top_connected"]:
             print("\nMost Connected:")
             for item in wiki_stats["top_connected"]:
                 print(f"  {item['page']}: {item['inbound']} inbound links")
+        quality = wiki_stats.get("quality")
+        if quality:
+            print(f"\nQuality Metrics:")
+            print(f"  Coverage:     {quality['coverage']}%")
+            print(f"  Connectivity: {quality['connectivity']}%")
+            print(f"  Freshness:    {quality['freshness']}%")
+            print(f"  Citation:     {quality['citation_rate']}%")
+            print(f"  Health Score: {quality['health_score']}/100")
         if log_entries:
             print(f"\nRecent Activity (last {len(log_entries)}):")
             for entry in log_entries:

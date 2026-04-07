@@ -8,6 +8,7 @@ summary:
     type: summary
     tags: []
     sources: ["{source_path}"]
+    citations: []  # [{source: "path", section: "heading"}]
     confidence: medium
     created: "{date}"
     updated: "{date}"
@@ -29,6 +30,7 @@ entity:
     type: entity
     tags: []
     entity_type: ""  # person | system | tool | service | team | org
+    citations: []  # [{source: "path", section: "heading"}]
     confidence: medium
     created: "{date}"
     updated: "{date}"
@@ -48,6 +50,7 @@ concept:
     title: "{title}"
     type: concept
     tags: []
+    citations: []  # [{source: "path", section: "heading"}]
     confidence: medium
     created: "{date}"
     updated: "{date}"
@@ -70,6 +73,7 @@ comparison:
     type: comparison
     tags: []
     subjects: []  # items being compared
+    citations: []  # [{source: "path", section: "heading"}]
     confidence: medium
     created: "{date}"
     updated: "{date}"
@@ -92,6 +96,7 @@ synthesis:
     type: synthesis
     tags: []
     sources: []
+    citations: []  # [{source: "path", section: "heading"}]
     confidence: medium
     created: "{date}"
     updated: "{date}"
@@ -115,6 +120,7 @@ chronicle:
     type: chronicle
     tags: []
     date_range: ""  # YYYY-MM-DD to YYYY-MM-DD
+    citations: []  # [{source: "path", section: "heading"}]
     confidence: medium
     created: "{date}"
     updated: "{date}"
@@ -136,6 +142,7 @@ adr:
     tags: []
     status: proposed  # proposed | accepted | deprecated | superseded
     deciders: []
+    citations: []  # [{source: "path", section: "heading"}]
     confidence: high
     created: "{date}"
     updated: "{date}"
@@ -161,6 +168,7 @@ runbook:
     title: "{title}"
     type: runbook
     tags: []
+    citations: []  # [{source: "path", section: "heading"}]
     confidence: high
     created: "{date}"
     updated: "{date}"
@@ -185,6 +193,7 @@ postmortem:
     tags: []
     incident_date: ""
     severity: ""  # critical | major | minor
+    citations: []  # [{source: "path", section: "heading"}]
     confidence: high
     created: "{date}"
     updated: "{date}"

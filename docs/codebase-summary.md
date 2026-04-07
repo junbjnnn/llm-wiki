@@ -43,7 +43,7 @@ project-repo/
 | `ingest.py` | 123 | Parse documents (PDF, HTML, TXT, Markdown) → markdown sources |
 | `update-index.py` | 131 | Rebuild index.md catalog from wiki pages |
 | `lint.py` | 226 | Check wiki health (orphans, broken links, stale pages) |
-| `stats.py` | 127 | Display wiki statistics (page counts, density, recent activity) |
+| `stats.py` | 127 | Display wiki statistics (page counts, density, recent activity); `--benchmark` flag shows quality metrics |
 | `graph.py` | 146 | Generate Mermaid knowledge graph from wikilinks |
 
 **Key Utilities:**
@@ -84,6 +84,7 @@ project-repo/
 **Wiki page types (9):** summary, entity, concept, comparison, synthesis, chronicle, adr, runbook, postmortem
 
 **Required frontmatter:** `title`, `type`, `tags`, `created`, `updated`
+**Recommended frontmatter:** `citations` (source references)
 
 **Wiki structure:** Organized by type not category (e.g., `wiki/summaries/`, `wiki/concepts/`)
 

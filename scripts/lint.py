@@ -113,6 +113,18 @@ def check_empty(pages: dict[Path, dict], texts: dict[Path, str]) -> list[str]:
     return issues
 
 
+def check_citations(pages: dict[Path, dict]) -> list[str]:
+    """Warn when wiki pages have empty citations field."""
+    issues = []
+    for path, fm in pages.items():
+        if fm.get("type") == "glossary":
+            continue
+        citations = fm.get("citations")
+        if citations is not None and not citations:
+            issues.append(f"  {path}: empty citations (consider adding source references)")
+    return issues
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Lint wiki for health issues")
     parser.add_argument("--fix", action="store_true", help="Auto-fix simple issues")
@@ -183,6 +195,10 @@ def main() -> None:
     issues = check_empty(pages, texts)
     if issues:
         all_issues["Empty pages"] = issues
+
+    issues = check_citations(pages)
+    if issues:
+        all_issues["Empty citations (warning)"] = issues
 
     # Auto-fix
     if args.fix:

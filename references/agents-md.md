@@ -26,30 +26,54 @@ Git-based markdown wiki. Sources in `sources/`, generated pages in `wiki/`. Conf
 2. Processes all supported files in folder. Pauses every 5 for progress report.
 
 ### Compile (AI-powered)
+
+#### Stage 1: Diff
 1. Scan `sources/` for files not yet summarized in `wiki/summaries/`
-2. For each uncompiled source:
-   - **Long content (>1000 chars):** Create `wiki/summaries/<name>.md` + extract entities → `wiki/entities/` + extract concepts → `wiki/concepts/` + add `[[wikilinks]]`
-   - **Short content (≤1000 chars):** Create summary only, mark concepts as `[pending]`
-3. **Update detection:** Check `wiki/summaries/` for existing page with same source in frontmatter `sources` field → UPDATE don't duplicate
-4. **Conflict detection:** If new source contradicts existing wiki content:
-   - Do NOT silently overwrite. Add a `> ⚠️ Conflict` blockquote in the affected section
-   - Format: `> ⚠️ Conflict: [[source-a]] states X, but [[source-b]] states Y.`
+2. Check `wiki/summaries/` for existing pages with same source in frontmatter `sources` field
+3. List: new sources, updated sources, unchanged sources
+4. If nothing new → report "Wiki is up to date" and stop
+
+#### Stage 2: Extract
+For each new/updated source:
+1. **Long content (>1000 chars):**
+   - Extract entities (people, systems, tools) → `wiki/entities/`
+   - Extract concepts (ideas, patterns) → `wiki/concepts/`
+   - Extract relationships (A relates to B because...)
+   - **Citations:** For each claim, add citation entry:
+     `citations: [{source: "sources/category/file.md", section: "Section Heading"}]`
+2. **Short content (≤1000 chars):**
+   - Note key points, mark concepts as `[pending]`
+
+#### Stage 3: Generate
+1. Create/update `wiki/summaries/<name>.md` with full frontmatter + `[[wikilinks]]`
+2. Create entity/concept pages from Stage 2 extractions
+3. **Conflict detection:** If new source contradicts existing wiki content:
+   - Add `> [!WARNING] Conflict: [[source-a]] states X, but [[source-b]] states Y.`
    - Keep both viewpoints with source attribution
-5. **Cascade updates:** After primary pages are created/updated:
-   - Scan wiki pages in related topics for content affected by the new source
-   - Update every page whose content is materially affected (add new info, cross-refs)
+4. **Cascade updates:** Scan wiki pages in related topics:
+   - Update every page whose content is materially affected
    - Refresh `updated` date on every touched page
-   - Log each cascaded page in the commit message
-6. Run: `python scripts/update-index.py`
-7. Append to `log.md`: `| <date> | compile | <details> | <author> |`
-8. Git commit: `docs: compile N sources, cascade-updated M pages`
+   - Log each cascaded page in commit message
+5. Run: `python scripts/update-index.py`
+6. Append to `log.md`: `| <date> | compile | <details> | <author> |`
+7. Git commit: `docs: compile N sources, cascade-updated M pages`
 
 ### Query (AI-powered — mandatory feedback loop)
 1. Search wiki: read `index.md`, grep for keywords, or `qmd query` if available
 2. Read relevant pages → synthesize answer for user
-3. **MANDATORY:** Evaluate: "Does this answer contain NEW insights not in wiki?"
+3. **Citations:** Answers MUST cite wiki pages with [[wikilinks]]. Format: "According to [[page-name]], ..."
+4. **MANDATORY:** Evaluate: "Does this answer contain NEW insights not in wiki?"
    - **YES →** Create new page (synthesis/concept) + update cross-refs + update index + log mutation
    - **NO →** Done (no log — queries are reads, not mutations)
+
+### Citation Format
+
+Pages should include `citations` in frontmatter to trace claims back to specific source sections:
+```yaml
+citations:
+  - {source: "sources/meetings/sprint-review.md", section: "Auth Discussion"}
+  - {source: "sources/architecture/api-spec.md", section: "Endpoints"}
+```
 
 ### Digest (AI-powered — deep synthesis)
 1. Read ALL sources and wiki pages related to `<topic>`
@@ -105,8 +129,8 @@ Format: `| YYYY-MM-DD | action | details | author |`
 
 ## Search Strategy
 
-- **< 100 pages:** Read `index.md` + `grep -ri "keyword" wiki/`
-- **100+ pages:** Use `qmd query "question"` if available, fallback grep
+- **< 50 pages:** Read `index.md` + `grep -ri "keyword" wiki/`
+- **50+ pages:** Use `qmd query "question"` if available, fallback grep. **Strongly recommended: install qmd**
 - **qmd commands:** `qmd query "question" --collection wiki` | `qmd search "keyword" --collection wiki`
 
 ## Directory Structure

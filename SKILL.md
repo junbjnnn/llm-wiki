@@ -14,11 +14,13 @@ metadata:
 
 ## Commands
 
-### `/wiki init [--name "Name"] [--language en] [--with-qmd]`
+### `/wiki init [--name "Name"] [--language en] [--with-qmd] [--obsidian]`
 Initialize wiki in current project.
 1. Run: `python scripts/init-wiki.py --name "Project Name" --language en --target .`
 2. Verify: check `.wiki/` created with AGENTS.md, sources/, wiki/
-3. Commit: `git add .wiki/ && git commit -m "docs: initialize llm-wiki"`
+3. Options: add `--obsidian` to generate Obsidian vault config (colors wiki page types in graph)
+4. Commit: `git add .wiki/ && git commit -m "docs: initialize llm-wiki"`
+5. If qmd not installed, recommend: `npm install -g @tobilu/qmd` (strongly recommended for 50+ pages)
 
 ### `/wiki ingest <file_or_url> [--category <cat>]`
 Parse document into wiki source (no AI needed).
@@ -32,23 +34,13 @@ Ingest all files in a folder.
 2. Script pauses every 5 files for progress. Report total when done.
 
 ### `/wiki compile`
-AI reads uncompiled sources → creates wiki pages.
-1. Scan `.wiki/sources/` for files not yet in `.wiki/wiki/summaries/`
-2. For each uncompiled source:
-   - Read source content
-   - **Long (>1000 chars):** Create summary + entities + concepts + wikilinks
-   - **Short (≤1000 chars):** Create summary only, concepts as [pending]
-   - **Check duplicates:** Search existing summaries by `sources` frontmatter field → update don't duplicate
-3. Save pages to `.wiki/wiki/<type>/` with full frontmatter
-4. **Conflict detection:** If new source contradicts existing content:
-   - Add `> ⚠️ Conflict: [[source-a]] states X, but [[source-b]] states Y.` blockquote
-   - Keep both viewpoints, never silently overwrite
-5. **Cascade updates:** Scan existing wiki pages for content affected by new source:
-   - Update affected pages (add new info, cross-refs)
-   - Refresh `updated` date on every touched page
-6. Run: `python scripts/update-index.py`
-7. Append to `.wiki/log.md`: `| <date> | compile | compiled N sources, cascade-updated M | claude |`
-8. Commit: `git commit -am "docs: compile N sources, cascade-updated M pages"`
+AI reads uncompiled sources → creates wiki pages (3 stages).
+1. **Diff:** Scan `.wiki/sources/` vs `.wiki/wiki/summaries/` — list new/changed sources
+2. **Extract:** For each new source: extract entities, concepts, relationships, citations
+3. **Generate:** Create/update wiki pages with wikilinks, conflict detection, cascade updates
+4. Run: `python scripts/update-index.py`
+5. Append to `.wiki/log.md`
+6. Commit: `git commit -am "docs: compile N sources, cascade-updated M pages"`
 
 ### `/wiki ingest+compile <file> [--category <cat>]`
 Shortcut: ingest then compile in one step.
@@ -86,6 +78,8 @@ Check wiki health.
 Wiki statistics.
 1. Run: `python scripts/stats.py`
 2. Show: page counts, source counts, cross-ref density, recent activity
+3. For quality benchmark: `python scripts/stats.py --benchmark`
+   - Coverage, connectivity, freshness, citation rate, health score (0-100)
 
 ### `/wiki graph`
 Generate knowledge graph.
