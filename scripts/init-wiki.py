@@ -174,7 +174,7 @@ def main() -> None:
     parser.add_argument("--root", default=".wiki", help="Wiki root dir (.wiki or .)")
     parser.add_argument("--target", default=".", help="Target project directory")
     parser.add_argument("--with-qmd", action="store_true", help="Setup qmd search")
-    parser.add_argument("--obsidian", action="store_true", help="Generate .obsidian/ config")
+    parser.add_argument("--no-obsidian", action="store_true", help="Skip .obsidian/ config generation")
     args = parser.parse_args()
 
     target = Path(args.target).resolve()
@@ -203,10 +203,9 @@ def main() -> None:
     if args.with_qmd:
         setup_qmd(wiki_root)
 
-    if args.obsidian:
+    if not args.no_obsidian:
         setup_obsidian(wiki_root)
         print(f"  Obsidian: {wiki_root / '.obsidian'} (vault config created)")
-        print("  Note: Consider adding .obsidian/ to .gitignore (personal preferences)")
 
     print(f"Wiki initialized at {wiki_root}")
     print(f"  Sources: {wiki_root / 'sources'} ({len(SOURCE_CATEGORIES)} categories)")
