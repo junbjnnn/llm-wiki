@@ -2,6 +2,8 @@
 
 Git-based markdown wiki for software teams. No server, no database. Pure git + markdown + Python scripts. Bring your own AI tool.
 
+> Inspired by [Andrej Karpathy's vision](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) of LLMs as a new kind of operating system — where the file system IS the knowledge base and AI tools are first-class citizens.
+
 ## Install
 
 ```bash
@@ -18,6 +20,29 @@ Works with Claude Code, Cursor, Codex, Gemini CLI, and [20+ other agents](https:
 - **Zero infrastructure:** git repo = your wiki. No hosting, no server, no API keys
 
 ## Architecture
+
+### Data Flow
+
+```
+                    ┌─────────────────────────────────────────┐
+                    │            your project repo            │
+                    └─────────────────────────────────────────┘
+                                       │
+  PDF, HTML, TXT, MD ──► [ingest.py] ──┤
+                                       ▼
+                                   sources/          (raw parsed documents)
+                                       │
+                              [AI compile] ──► wiki/  (generated pages with wikilinks)
+                                                 │
+                              [AI query] ◄───────┘
+                                   │
+                                   ▼
+                                Answer
+                                   │
+                                   └──► new insight? ──► wiki/  (feedback loop)
+```
+
+### Directory Structure
 
 ```
 project-repo/
