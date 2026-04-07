@@ -80,6 +80,55 @@ python .wiki/scripts/ingest.py meeting-notes.pdf --category meetings --output .w
 4. **Digest** — AI deep-analyzes a topic across all sources
 5. **Lint** — Check wiki consistency and health
 
+## Real-World Workflows
+
+### "How does our auth system work?"
+New developer needs to understand a feature.
+```
+/wiki query "authentication flow"
+```
+Wiki searches all ingested docs, synthesizes answer with citations. If the answer reveals new insight, a wiki page is created automatically.
+
+### Feature spec changed after meeting
+PM updates requirements after stakeholder meeting.
+```
+/wiki ingest meeting-notes-apr7.pdf --category meetings
+/wiki compile
+```
+AI detects conflicts with existing spec and annotates them. Related wiki pages are cascade-updated.
+
+### Adding a new feature
+Team starts building a new module.
+```
+/wiki ingest prd-payment-v2.pdf --category product
+/wiki ingest api-spec.yaml --category architecture
+/wiki compile
+```
+Creates summaries, extracts entities (services, APIs), links concepts. Query the wiki anytime during development for up-to-date context.
+
+### Post-incident analysis
+Production incident happened, need to document.
+```
+/wiki ingest postmortem-2026-04-07.md --category operations
+/wiki compile
+```
+Wiki links to related runbooks and past incidents. Lint ensures nothing falls through cracks.
+
+### Sprint planning prep
+PM needs a comprehensive overview of a topic.
+```
+/wiki digest "payment module"
+```
+Deep cross-source report: progress, gaps, contradictions, open questions. Saved permanently, compounds over sprints.
+
+### Onboarding new team member
+New hire reads the wiki instead of asking 10 people.
+```
+/wiki query "project overview"
+/wiki query "how to deploy to staging"
+/wiki status
+```
+
 ## Claude Code Integration
 
 ```bash
