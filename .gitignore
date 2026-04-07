@@ -21,3 +21,6 @@ Thumbs.db
 
 # Environment
 .env
+
+# Plans (local only)
+plans/
