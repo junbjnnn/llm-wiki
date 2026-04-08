@@ -179,6 +179,7 @@ bash install.sh    # Manual install for Claude Code
 - [Getting Started](docs/getting-started.md)
 - [For PM/PO](docs/for-pm-po.md)
 - [For Developers](docs/for-developers.md)
+- [Use Cases](docs/use-cases.md)
 - [Tool-Specific Setup](docs/tool-specific-setup.md)
 
 ## License
