@@ -7,11 +7,22 @@ Usage:
 """
 
 import argparse
+import re
 import sys
 from datetime import date
 from pathlib import Path
+from urllib.parse import urlparse
 
 from config import SOURCE_CATEGORIES, find_wiki_root, load_config
+
+# Patterns that may indicate prompt injection attempts in ingested content
+_SUSPICIOUS_PATTERNS = [
+    re.compile(r"<\s*system\s*>", re.IGNORECASE),
+    re.compile(r"<\s*/?\s*(?:instruction|system|prompt|command)\s*>", re.IGNORECASE),
+    re.compile(r"(?:ignore|disregard|forget)\s+(?:all\s+)?(?:previous|above|prior)\s+instructions", re.IGNORECASE),
+    re.compile(r"you\s+are\s+now\s+(?:a|an|in)\s+", re.IGNORECASE),
+    re.compile(r"act\s+as\s+(?:a|an)\s+", re.IGNORECASE),
+]
 
 
 def parse_file(file_path: str) -> str:
@@ -31,28 +42,74 @@ def parse_file(file_path: str) -> str:
         sys.exit(1)
 
 
-def add_frontmatter(content: str, title: str, source_path: str) -> str:
+def _is_url(path: str) -> bool:
+    """Check if path is a URL."""
+    try:
+        result = urlparse(path)
+        return result.scheme in ("http", "https")
+    except ValueError:
+        return False
+
+
+def _check_suspicious_content(content: str, source: str) -> list[str]:
+    """Scan content for patterns that may indicate prompt injection attempts.
+
+    Returns list of warning messages (empty if clean).
+    """
+    warnings = []
+    for pattern in _SUSPICIOUS_PATTERNS:
+        matches = pattern.findall(content)
+        if matches:
+            warnings.append(f"  Suspicious pattern in {source}: '{matches[0]}'")
+    return warnings
+
+
+def add_frontmatter(content: str, title: str, source_path: str, *, trusted: bool = True) -> str:
     """Add minimal YAML frontmatter to parsed content."""
     today = date.today().isoformat()
+    trust_line = f"trusted: {'true' if trusted else 'false'}\n"
     fm = (
         f"---\n"
         f"title: \"{title}\"\n"
         f"source: \"{source_path}\"\n"
         f"ingested: {today}\n"
+        f"{trust_line}"
         f"---\n\n"
     )
     return fm + content
 
 
 def ingest_single(file_path: str, category: str, output_dir: Path | None) -> str:
-    """Ingest a single file. Returns output path or prints to stdout."""
-    path = Path(file_path)
-    title = path.stem.replace("-", " ").replace("_", " ").title()
+    """Ingest a single file or URL. Returns output path or prints to stdout."""
+    is_url = _is_url(file_path)
+    trusted = not is_url
+
+    if is_url:
+        # Derive filename from URL path
+        url_path = urlparse(file_path).path
+        stem = Path(url_path).stem if url_path and url_path != "/" else "web-content"
+        title = stem.replace("-", " ").replace("_", " ").title()
+        print(f"⚠ URL source detected — marking as untrusted: {file_path}", file=sys.stderr)
+    else:
+        path = Path(file_path)
+        stem = path.stem
+        title = stem.replace("-", " ").replace("_", " ").title()
+
     content = parse_file(file_path)
-    result = add_frontmatter(content, title, str(path))
+
+    # Scan for suspicious content patterns
+    warnings = _check_suspicious_content(content, file_path)
+    if warnings:
+        print("⚠ Suspicious content detected (possible prompt injection):", file=sys.stderr)
+        for w in warnings:
+            print(w, file=sys.stderr)
+        print("  Content ingested but marked untrusted. Review before compiling.", file=sys.stderr)
+        trusted = False
+
+    result = add_frontmatter(content, title, file_path, trusted=trusted)
 
     if output_dir:
-        out_file = output_dir / f"{path.stem}.md"
+        out_file = output_dir / f"{stem}.md"
         out_file.parent.mkdir(parents=True, exist_ok=True)
         out_file.write_text(result)
         return str(out_file)
