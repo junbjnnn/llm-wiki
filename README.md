@@ -43,6 +43,14 @@ Works with Claude Code, Cursor, Codex, Gemini CLI, and [20+ other agents](https:
                                    └──► new insight? ──► wiki/  (feedback loop)
 ```
 
+### Three Layers
+
+| Layer | Contents | Who writes it |
+|-------|----------|---------------|
+| `sources/` | Raw parsed documents — immutable. 8 categories. | You (via `ingest.py`) |
+| `wiki/` | AI-generated pages — 9 types + glossary. Wikilinks. | The LLM (via `/wiki compile`) |
+| `schema` | `AGENTS.md`, `CLAUDE.md`, `.llm-wiki.toml`, `index.md`, `log.md` | You + the LLM |
+
 ### Directory Structure
 
 ```
