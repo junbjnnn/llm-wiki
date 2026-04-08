@@ -125,6 +125,18 @@ def check_citations(pages: dict[Path, dict]) -> list[str]:
     return issues
 
 
+def check_freshness(pages: dict[Path, dict], sources_dir: Path,
+                     half_life: int, threshold: int) -> list[str]:
+    """Warn on pages with low freshness score (temporal decay)."""
+    from stats import compute_page_freshness
+    issues = []
+    for path, fm in pages.items():
+        score = compute_page_freshness(fm, sources_dir, half_life)
+        if score < threshold:
+            issues.append(f"  {path}: low freshness ({score:.0f}/100, threshold: {threshold})")
+    return issues
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Lint wiki for health issues")
     parser.add_argument("--fix", action="store_true", help="Auto-fix simple issues")
@@ -199,6 +211,13 @@ def main() -> None:
     issues = check_citations(pages)
     if issues:
         all_issues["Empty citations (warning)"] = issues
+
+    freshness_cfg = config.get("freshness", {})
+    half_life = freshness_cfg.get("half_life_days", 90)
+    warn_threshold = freshness_cfg.get("warn_threshold", 30)
+    issues = check_freshness(pages, paths["sources"], half_life, warn_threshold)
+    if issues:
+        all_issues["Low freshness (warning)"] = issues
 
     # Auto-fix
     if args.fix:

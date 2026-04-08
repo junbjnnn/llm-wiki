@@ -99,7 +99,7 @@ The agent handles dependencies, initialization, and walks you through your first
 | `ingest.py` | Parse documents → markdown sources |
 | `update-index.py` | Rebuild index.md catalog |
 | `lint.py` | Check wiki health (orphans, broken links) |
-| `stats.py` | Wiki statistics |
+| `stats.py` | Wiki statistics + freshness scoring |
 | `graph.py` | Generate Mermaid knowledge graph |
 | `setup-qmd.sh` | Setup qmd semantic search (optional) |
 

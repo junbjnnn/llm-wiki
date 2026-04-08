@@ -12,6 +12,7 @@ Git-based markdown wiki. Sources in `sources/`, generated pages in `wiki/`. Conf
 - **Frontmatter:** Every wiki page MUST have YAML frontmatter with: `title`, `type`, `tags`, `created`, `updated`
 - **Cross-refs:** Use `[[page-name]]` wikilinks (Obsidian compatible). Target = filename without `.md`
 - **Confidence:** Tag pages `confidence: high|medium|low`. Default: `medium`
+- **Freshness:** Computed from citation source ages x confidence weights. Exponential decay with configurable half-life (default: 90 days). Check with `python scripts/stats.py --benchmark`
 - **Language:** {language}
 
 ## Workflows
@@ -39,8 +40,12 @@ For each new/updated source:
    - Extract entities (people, systems, tools) → `wiki/entities/`
    - Extract concepts (ideas, patterns) → `wiki/concepts/`
    - Extract relationships (A relates to B because...)
-   - **Citations:** For each claim, add citation entry:
-     `citations: [{source: "sources/category/file.md", section: "Section Heading"}]`
+   - **Citations:** For each claim, add citation entry with confidence:
+     `citations: [{source: "sources/category/file.md", section: "Section Heading", confidence: "high"}]`
+   - **Confidence per citation:**
+     - `high`: Source is recent (< 3 months), authoritative, no contradictions
+     - `medium`: Default. Source is reasonably current
+     - `low`: Source is old (> 6 months), or superseded by newer source on same topic
 2. **Short content (≤1000 chars):**
    - Note key points, mark concepts as `[pending]`
 
@@ -50,6 +55,7 @@ For each new/updated source:
 3. **Conflict detection:** If new source contradicts existing wiki content:
    - Add `> [!WARNING] Conflict: [[source-a]] states X, but [[source-b]] states Y.`
    - Keep both viewpoints with source attribution
+   - Mark older/superseded citation as `confidence: low`
 4. **Cascade updates:** Scan wiki pages in related topics:
    - Update every page whose content is materially affected
    - Refresh `updated` date on every touched page
@@ -68,11 +74,13 @@ For each new/updated source:
 
 ### Citation Format
 
-Pages should include `citations` in frontmatter to trace claims back to specific source sections:
+Pages should include `citations` in frontmatter to trace claims back to specific source sections.
+Each citation includes a `confidence` level (`high|medium|low`, default: `medium`) for freshness scoring:
 ```yaml
 citations:
-  - {source: "sources/meetings/sprint-review.md", section: "Auth Discussion"}
-  - {source: "sources/architecture/api-spec.md", section: "Endpoints"}
+  - {source: "sources/meetings/sprint-review.md", section: "Auth Discussion", confidence: high}
+  - {source: "sources/architecture/api-spec.md", section: "Endpoints", confidence: medium}
+  - {source: "sources/product/prd-v1.md", section: "Requirements", confidence: low}  # superseded by prd-v2
 ```
 
 ### Digest (AI-powered — deep synthesis)

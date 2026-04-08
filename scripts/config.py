@@ -33,6 +33,8 @@ REQUIRED_FRONTMATTER = ["title", "type", "tags", "created", "updated"]
 
 WIKILINK_RE = re.compile(r"\[\[([^\]]+)\]\]")
 
+CONFIDENCE_WEIGHTS = {"high": 1.0, "medium": 0.7, "low": 0.3}
+
 
 # --- Functions ---
 
@@ -84,6 +86,19 @@ def parse_frontmatter(text: str) -> dict:
 def extract_wikilinks(text: str) -> list[str]:
     """Find all [[wikilink]] references in text."""
     return WIKILINK_RE.findall(text)
+
+
+def compute_age_decay(source_date, half_life: int = 90) -> float:
+    """Exponential decay: 1.0 at day 0, 0.5 at half_life days."""
+    from datetime import date
+    if not isinstance(source_date, date):
+        return 0.0
+    if half_life <= 0:
+        return 0.0
+    days = (date.today() - source_date).days
+    if days <= 0:
+        return 1.0
+    return 2 ** (-days / half_life)
 
 
 def resolve_wikilink(name: str, wiki_dir: Path) -> Path | None:

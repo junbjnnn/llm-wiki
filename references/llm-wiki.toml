@@ -22,6 +22,10 @@ stale_days = 30
 require_backlinks = true
 require_sources = true
 
+[freshness]
+half_life_days = 90       # days until source weight halves (exponential decay)
+warn_threshold = 30       # lint warns on pages below this freshness score (0-100)
+
 [qmd]
 enabled = false
 collection_name = "wiki"
